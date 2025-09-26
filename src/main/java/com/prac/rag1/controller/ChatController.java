@@ -26,6 +26,7 @@ public class ChatController
 
             return this.chatClient.prompt()
                     .advisors(customLogger)
+                    //.advisors(new QuestionAnswerAdvisor())
                     .user(userInput)
                     .call()
                     .content();

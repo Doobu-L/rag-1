@@ -34,6 +34,12 @@ dependencies {
     implementation 'org.springframework.ai:spring-ai-starter-model-vertex-ai-embedding'
     implementation 'org.springframework.ai:spring-ai-starter-model-vertex-ai-gemini'
 
+    implementation 'org.springframework.ai:spring-ai-advisors-vector-store'
+    implementation 'org.springframework.ai:spring-ai-starter-vector-store-elasticsearch'
+    implementation 'co.elastic.clients:elasticsearch-java'
+
+
+
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

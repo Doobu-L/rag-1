@@ -7,7 +7,6 @@ spring:
         gemini:
           project-id: boreal-forest-471802-g5
           location: us-central1
-
           chat:
             options:
               model: gemini-2.0-flash
@@ -15,6 +14,8 @@ spring:
         embedding:
           project-id: boreal-forest-471802-g5
           location: us-central1
+          model: text-embedding-004
+
     chat:
       memory:
         repository:
