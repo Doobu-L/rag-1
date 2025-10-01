@@ -1,4 +1,6 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
   application:
     name: rag-1
   ai:
@@ -15,13 +17,22 @@ spring:
           project-id: boreal-forest-471802-g5
           location: us-central1
           model: text-embedding-004
-
     chat:
       memory:
         repository:
           jdbc:
             initialize-schema: embedded
+    vectorstore:
+      elasticsearch:
+        index-name: my_rag_data
+        initialize-schema: true
+        dimensions: 1536
+        similarity: cosine
 
+  elasticsearch:
+    uris: http://localhost:9200
+    username: elastic
+    password: 2GYL3rs3MA+t6eycrfGS
 
 
 
