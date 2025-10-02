@@ -38,8 +38,7 @@ dependencies {
     implementation 'org.springframework.ai:spring-ai-starter-vector-store-elasticsearch'
     implementation 'co.elastic.clients:elasticsearch-java'
 
-
-
+    implementation 'org.springframework.ai:spring-ai-pdf-document-reader'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
