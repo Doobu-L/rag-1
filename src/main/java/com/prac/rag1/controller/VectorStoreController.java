@@ -1,4 +1,4 @@
-package com.prac.rag1.api;
+package com.prac.rag1.controller;
 
 import java.util.List;
 import java.util.Map;
