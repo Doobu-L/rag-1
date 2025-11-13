@@ -1,0 +1,36 @@
+version: '3.7'
+
+services:
+  # 1. Elasticsearch 서비스 정의
+  elasticsearch:
+    image: elasticsearch:9.1.4 # 사용할 ES 버전 지정
+    container_name: elasticsearch
+    environment:
+      # 싱글 노드 환경을 위한 설정
+      - discovery.type=single-node
+      # X-Pack 보안 기능 비활성화 (개발 편의)
+      - xpack.security.enabled=false
+      # 메모리 설정 (로컬 환경에 맞게 조정)
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - 9200:9200 # 외부 접근 포트
+    volumes:
+      # 컨테이너 종료 후에도 데이터가 유지되도록 설정
+      - esdata:/usr/share/elasticsearch/data
+
+  # 2. Kibana 서비스 정의
+  kibana:
+    image: kibana:9.1.4 # Elasticsearch와 버전 일치
+    container_name: kibana
+    ports:
+      - 5601:5601 # 외부 접근 포트
+    environment:
+      # Kibana가 Elasticsearch에 접속할 주소 지정
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch # Elasticsearch가 먼저 실행되도록 종속성 설정
+
+# 컨테이너 종료 후에도 데이터가 남을 볼륨 정의
+volumes:
+  esdata:
+    driver: local
