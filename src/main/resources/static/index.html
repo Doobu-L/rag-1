@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring AI 챗</title>
+    <style>
+        body {
+            font-family: 'Google Sans', 'Noto Sans KR', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f3f6; /* 밝은 회색 배경 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #chat-container {
+            width: 100%;
+            max-width: 800px; /* 최대 너비 설정 */
+            height: 90vh; /* 화면 높이의 90% 사용 */
+            display: flex;
+            flex-direction: column;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        #chat-history {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #fcfcfc;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message-row {
+            display: flex;
+            width: 100%;
+        }
+
+        .message-row.user {
+            justify-content: flex-end;
+        }
+
+        .message-row.ai {
+            justify-content: flex-start;
+        }
+
+        .chat-message {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 20px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .chat-message.user {
+            background-color: #e6f4ea; /* 연한 초록색 */
+            color: #202124;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-message.ai {
+            background-color: #e8f0fe; /* 연한 파란색 */
+            color: #202124;
+            border-bottom-left-radius: 4px;
+        }
+
+        #input-area {
+            display: flex;
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            background-color: #ffffff;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #user-input {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 1px solid #dadce0;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            resize: none; /* 크기 조절 방지 */
+            max-height: 100px; /* 최대 높이 설정 */
+            overflow-y: auto;
+        }
+
+        #user-input:focus {
+            border-color: #4285f4; /* 포커스 시 Google 파란색 */
+            box-shadow: 0 1px 2px rgba(66, 133, 244, 0.2);
+        }
+
+        #send-button {
+            background-color: #1a73e8; /* Google 파란색 */
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #send-button:hover {
+            background-color: #1565c0;
+        }
+
+        #send-button:disabled {
+            background-color: #a0c3f7; /* 비활성화 시 연한 파란색 */
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="chat-history">
+            <div class="message-row ai">
+                <div class="chat-message ai">안녕하세요! 무엇을 도와드릴까요?</div>
+            </div>
+        </div>
+        <div id="input-area">
+            <textarea id="user-input" placeholder="메시지를 입력하세요..." rows="1"></textarea>
+            <button id="send-button">보내기</button>
+        </div>
+    </div>
+
+    <script>
+        const chatHistory = document.getElementById('chat-history');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+
+        function addMessage(text, sender) {
+            const messageRow = document.createElement('div');
+            messageRow.classList.add('message-row', sender);
+
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('chat-message', sender);
+            messageDiv.textContent = text; // HTML 이스케이프 자동 처리
+
+            messageRow.appendChild(messageDiv);
+            chatHistory.appendChild(messageRow);
+
+            // 스크롤을 항상 최하단으로 이동
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (message === '') return;
+
+            addMessage(message, 'user');
+            userInput.value = '';
+            sendButton.disabled = true; // 메시지 전송 중 버튼 비활성화
+
+            try {
+                // Spring Boot Controller의 /chat/ask 엔드포인트 호출
+                const response = await fetch(`/chat/ask?userInput=${encodeURIComponent(message)}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const aiResponse = await response.text(); // 응답이 plain text이므로 .text() 사용
+                addMessage(aiResponse, 'ai');
+            } catch (error) {
+                console.error('Error sending message:', error);
+                addMessage('오류가 발생했습니다. 다시 시도해 주세요.', 'ai');
+            } finally {
+                sendButton.disabled = false; // 전송 완료 후 버튼 활성화
+                userInput.style.height = 'auto'; // textarea 높이 초기화
+            }
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+
+        userInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter' && !event.shiftKey) { // Shift+Enter는 줄 바꿈
+                event.preventDefault(); // 기본 Enter 동작 (줄 바꿈) 방지
+                sendMessage();
+            }
+        });
+
+        // textarea 높이 자동 조절
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        // 초기 로딩 시 input 높이 조정 (placeholder 있을 경우)
+        window.addEventListener('load', () => {
+            userInput.style.height = (userInput.scrollHeight) + 'px';
+        });
+
+    </script>
+</body>
+</html>
