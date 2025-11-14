@@ -1,21 +1,18 @@
 package com.prac.rag1.config;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.embedding.TokenCountBatchingStrategy;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@RequiredArgsConstructor
 public class VectorStoreConfig {
-
-    private final EmbeddingModel embeddingModel;
-
-    public VectorStoreConfig(EmbeddingModel embeddingModel) {
-        this.embeddingModel = embeddingModel;
-    }
 
     @Bean
     public RestClient restClient() {
@@ -23,7 +20,7 @@ public class VectorStoreConfig {
                 .build();
     }
     @Bean
-    public VectorStore vectorStore(RestClient restClient, EmbeddingModel embeddingModel) {
+    public VectorStore vectorStore(RestClient restClient, @Qualifier("textEmbedding") EmbeddingModel embeddingModel) {
 
         return org.springframework.ai.vectorstore.elasticsearch.ElasticsearchVectorStore.builder(restClient, embeddingModel)
                 .batchingStrategy(new TokenCountBatchingStrategy()) // Optional: defaults to TokenCountBatchingStrategy

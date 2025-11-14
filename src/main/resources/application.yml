@@ -17,6 +17,13 @@ spring:
           project-id: boreal-forest-471802-g5
           location: us-central1
           model: text-embedding-004
+          enabled: true
+          text:
+            options:
+              dimensions: 768
+    huggingface:
+      embedding:
+        enabled: false
     chat:
       memory:
         repository:
@@ -26,13 +33,13 @@ spring:
       elasticsearch:
         index-name: my_rag_data
         initialize-schema: true
-        dimensions: 1536
+        dimensions: 768
         similarity: cosine
 
   elasticsearch:
     uris: http://localhost:9200
     username: elastic
-    password: 2GYL3rs3MA+t6eycrfGS
+    password: RFxjWU6af+A9b*yQ4Wur
 
 
 
