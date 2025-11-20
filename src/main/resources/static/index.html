@@ -3,200 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spring AI 챗</title>
+    <title>Spring AI RAG 챗봇</title>
     <style>
-        body {
-            font-family: 'Google Sans', 'Noto Sans KR', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f3f6; /* 밝은 회색 배경 */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        #chat-container {
-            width: 100%;
-            max-width: 800px; /* 최대 너비 설정 */
-            height: 90vh; /* 화면 높이의 90% 사용 */
-            display: flex;
-            flex-direction: column;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        #chat-history {
-            flex-grow: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background-color: #fcfcfc;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .message-row {
-            display: flex;
-            width: 100%;
-        }
-
-        .message-row.user {
-            justify-content: flex-end;
-        }
-
-        .message-row.ai {
-            justify-content: flex-start;
-        }
-
-        .chat-message {
-            max-width: 70%;
-            padding: 12px 18px;
-            border-radius: 20px;
-            line-height: 1.5;
-            word-wrap: break-word;
-        }
-
-        .chat-message.user {
-            background-color: #e6f4ea; /* 연한 초록색 */
-            color: #202124;
-            border-bottom-right-radius: 4px;
-        }
-
-        .chat-message.ai {
-            background-color: #e8f0fe; /* 연한 파란색 */
-            color: #202124;
-            border-bottom-left-radius: 4px;
-        }
-
-        #input-area {
-            display: flex;
-            padding: 15px 20px;
-            border-top: 1px solid #eee;
-            background-color: #ffffff;
-            align-items: center;
-            gap: 10px;
-        }
-
-        #user-input {
-            flex-grow: 1;
-            padding: 12px 15px;
-            border: 1px solid #dadce0;
-            border-radius: 25px;
-            font-size: 16px;
-            outline: none;
-            resize: none; /* 크기 조절 방지 */
-            max-height: 100px; /* 최대 높이 설정 */
-            overflow-y: auto;
-        }
-
-        #user-input:focus {
-            border-color: #4285f4; /* 포커스 시 Google 파란색 */
-            box-shadow: 0 1px 2px rgba(66, 133, 244, 0.2);
-        }
-
-        #send-button {
-            background-color: #1a73e8; /* Google 파란색 */
-            color: white;
-            border: none;
-            border-radius: 25px;
-            padding: 12px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        #send-button:hover {
-            background-color: #1565c0;
-        }
-
-        #send-button:disabled {
-            background-color: #a0c3f7; /* 비활성화 시 연한 파란색 */
-            cursor: not-allowed;
-        }
+        body, html { font-family: 'Google Sans', 'Noto Sans KR', sans-serif; margin: 0; padding: 20px; background-color: #f0f3f6; color: #333; box-sizing: border-box; }
+        #main-container { display: flex; width: 100%; max-width: 1200px; height: 90vh; margin: auto; gap: 20px; }
+        #sidebar { width: 320px; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        .sidebar-section { border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .sidebar-section:last-child { border-bottom: none; }
+        h3 { margin: 0 0 15px; font-size: 16px; font-weight: 600; }
+        .mode-option { display: flex; align-items: center; padding: 10px; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .mode-option:hover { background: #f8f9fa; }
+        .mode-option.active { border-color: #1a73e8; background: #e8f0fe; }
+        .mode-option input { margin-right: 10px; }
+        .btn { background-color: #1a73e8; color: #fff; border: none; border-radius: 6px; padding: 10px 16px; font-size: 14px; cursor: pointer; transition: background-color 0.3s; width: 100%; }
+        .btn:hover { background-color: #1565c0; }
+        .btn-secondary { background-color: #5f6368; }
+        .btn-secondary:hover { background-color: #3c4043; }
+        #upload-status { font-size: 12px; color: #5f6368; margin-top: 10px; min-height: 20px; }
+        #chat-container { flex-grow: 1; display: flex; flex-direction: column; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        #chat-header { padding: 15px 20px; background: #1a73e8; color: #fff; border-radius: 12px 12px 0 0; }
+        #chat-header h2 { margin: 0; font-size: 18px; }
+        #chat-history { flex-grow: 1; padding: 20px; overflow-y: auto; }
+        .message-row { display: flex; margin-bottom: 15px; }
+        .message-row.user { justify-content: flex-end; }
+        .chat-message { max-width: 70%; padding: 12px 18px; border-radius: 20px; line-height: 1.5; white-space: pre-wrap; }
+        .chat-message.user { background: #e6f4ea; color: #202124; border-bottom-right-radius: 4px; }
+        .chat-message.ai { background: #e8f0fe; color: #202124; border-bottom-left-radius: 4px; }
+        #input-area { display: flex; padding: 15px; border-top: 1px solid #eee; }
+        #user-input { flex-grow: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 25px; font-size: 16px; resize: none; }
+        #send-button { background: #1a73e8; color: #fff; border: none; border-radius: 25px; padding: 12px 20px; font-size: 16px; margin-left: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div id="chat-container">
-        <div id="chat-history">
-            <div class="message-row ai">
-                <div class="chat-message ai">안녕하세요! 무엇을 도와드릴까요?</div>
+<div id="main-container">
+    <div id="sidebar">
+        <div class="sidebar-section">
+            <h3>💬 채팅 모드</h3>
+            <div class="mode-option active" id="mode-rag">
+                <input type="radio" name="mode" value="rag" checked>
+                <label><strong>RAG 모드</strong> (문서 기반 응답)</label>
+            </div>
+            <div class="mode-option" id="mode-llm">
+                <input type="radio" name="mode" value="llm">
+                <label><strong>일반 LLM 모드</strong> (직접 응답)</label>
             </div>
         </div>
+        <div class="sidebar-section">
+            <h3>📄 문서 업로드 (PDF)</h3>
+            <input type="file" id="file-input" accept=".pdf" style="margin-bottom: 10px;">
+            <button id="upload-btn" class="btn">업로드 & 임베딩</button>
+            <div id="upload-status"></div>
+        </div>
+        <div class="sidebar-section">
+            <h3>🔍 벡터 스토어 관리</h3>
+            <button id="seed-btn" class="btn btn-secondary" style="margin-bottom: 10px;">테스트 문서 추가</button>
+            <button id="test-search-btn" class="btn btn-secondary">벡터 검색 테스트</button>
+        </div>
+    </div>
+    <div id="chat-container">
+        <div id="chat-header">
+            <h2>Gemini 2.5 Pro - RAG 챗봇</h2>
+        </div>
+        <div id="chat-history"></div>
         <div id="input-area">
             <textarea id="user-input" placeholder="메시지를 입력하세요..." rows="1"></textarea>
             <button id="send-button">보내기</button>
         </div>
     </div>
+</div>
 
-    <script>
-        const chatHistory = document.getElementById('chat-history');
-        const userInput = document.getElementById('user-input');
-        const sendButton = document.getElementById('send-button');
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM 요소 가져오기 ---
+            const chatHistory = document.getElementById('chat-history');
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
+            const uploadBtn = document.getElementById('upload-btn');
+            const fileInput = document.getElementById('file-input');
+            const uploadStatus = document.getElementById('upload-status');
+            const modeRag = document.getElementById('mode-rag');
+            const modeLlm = document.getElementById('mode-llm');
 
-        function addMessage(text, sender) {
-            const messageRow = document.createElement('div');
-            messageRow.classList.add('message-row', sender);
+            // --- 상태 변수 ---
+            let currentMode = 'rag';
+            let isSending = false; // ✨ 중복 전송 방지를 위한 플래그
 
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('chat-message', sender);
-            messageDiv.textContent = text; // HTML 이스케이프 자동 처리
+            // --- 함수 정의 ---
+            const updateMode = (newMode) => {
+                currentMode = newMode;
+                modeRag.classList.toggle('active', newMode === 'rag');
+                modeLlm.classList.toggle('active', newMode === 'llm');
+                document.querySelector(`input[value="${newMode}"]`).checked = true;
+                addSystemMessage(`모드가 ${newMode === 'rag' ? 'RAG' : '일반 LLM'}(으)로 변경되었습니다.`);
+            };
 
-            messageRow.appendChild(messageDiv);
-            chatHistory.appendChild(messageRow);
+            const addMessage = (text, sender) => {
+                const messageRow = document.createElement('div');
+                messageRow.className = `message-row ${sender}`;
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `chat-message ${sender}`;
+                messageDiv.textContent = text;
+                messageRow.appendChild(messageDiv);
+                chatHistory.appendChild(messageRow);
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            };
 
-            // 스크롤을 항상 최하단으로 이동
-            chatHistory.scrollTop = chatHistory.scrollHeight;
-        }
+            const addSystemMessage = (text) => addMessage(text, 'ai');
 
-        async function sendMessage() {
-            const message = userInput.value.trim();
-            if (message === '') return;
+            const sendMessage = async () => {
+                // ✨ 중복 전송 방지 로직
+                if (isSending) return; 
 
-            addMessage(message, 'user');
-            userInput.value = '';
-            sendButton.disabled = true; // 메시지 전송 중 버튼 비활성화
+                const message = userInput.value.trim();
+                if (!message) return;
 
-            try {
-                // Spring Boot Controller의 /chat/ask 엔드포인트 호출
-                const response = await fetch(`/chat/ask?userInput=${encodeURIComponent(message)}`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                isSending = true; // 요청 시작 시 플래그 설정
+                sendButton.disabled = true;
+                addMessage(message, 'user');
+                userInput.value = '';
+
+                try {
+                    const response = await fetch(`/chat/ask?userInput=${encodeURIComponent(message)}&useRag=${currentMode === 'rag'}`);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    const aiResponse = await response.text();
+                    addMessage(aiResponse, 'ai');
+                } catch (error) {
+                    addSystemMessage(`오류: ${error.message}. 다시 시도해주세요.`);
+                } finally {
+                    isSending = false; // 요청 완료 시 플래그 해제
+                    sendButton.disabled = false;
+                    userInput.focus();
                 }
-                const aiResponse = await response.text(); // 응답이 plain text이므로 .text() 사용
-                addMessage(aiResponse, 'ai');
-            } catch (error) {
-                console.error('Error sending message:', error);
-                addMessage('오류가 발생했습니다. 다시 시도해 주세요.', 'ai');
-            } finally {
-                sendButton.disabled = false; // 전송 완료 후 버튼 활성화
-                userInput.style.height = 'auto'; // textarea 높이 초기화
-            }
-        }
+            };
 
-        sendButton.addEventListener('click', sendMessage);
+            const uploadFile = async () => {
+                const file = fileInput.files[0];
+                if (!file) {
+                    uploadStatus.textContent = '파일을 선택하세요.';
+                    return;
+                }
+                uploadStatus.textContent = '업로드 중...';
+                uploadBtn.disabled = true;
 
-        userInput.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter' && !event.shiftKey) { // Shift+Enter는 줄 바꿈
-                event.preventDefault(); // 기본 Enter 동작 (줄 바꿈) 방지
-                sendMessage();
-            }
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    const response = await fetch('/etl/upload', { method: 'POST', body: formData });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    uploadStatus.textContent = `✓ ${file.name} 업로드 완료!`;
+                    addSystemMessage(`문서 "${file.name}"이(가) 벡터 스토어에 추가되었습니다.`);
+                } catch (error) {
+                    uploadStatus.textContent = `업로드 실패: ${error.message}`;
+                } finally {
+                    uploadBtn.disabled = false;
+                    fileInput.value = '';
+                }
+            };
+
+            // --- 이벤트 리스너 등록 ---
+            sendButton.addEventListener('click', sendMessage);
+            userInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            uploadBtn.addEventListener('click', uploadFile);
+            modeRag.addEventListener('click', () => updateMode('rag'));
+            modeLlm.addEventListener('click', () => updateMode('llm'));
+
+            document.getElementById('seed-btn').addEventListener('click', async () => {
+                addSystemMessage('테스트 문서 추가 중...');
+                const response = await fetch('/vector-store/seed', { method: 'POST' });
+                const result = await response.text();
+                addSystemMessage(result);
+            });
+
+            document.getElementById('test-search-btn').addEventListener('click', async () => {
+                const query = prompt('검색할 텍스트를 입력하세요:', 'Spring AI');
+                if (!query) return;
+                const response = await fetch(`/vector-store/search?q=${encodeURIComponent(query)}`);
+                const results = await response.json();
+                addSystemMessage(`"${query}" 검색 결과:\n${results.join('\n')}`);
+            });
+
+            addSystemMessage('안녕하세요! RAG 챗봇입니다. 문서를 업로드하거나 모드를 변경하여 대화를 시작하세요.');
         });
-
-        // textarea 높이 자동 조절
-        userInput.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
-        });
-
-        // 초기 로딩 시 input 높이 조정 (placeholder 있을 경우)
-        window.addEventListener('load', () => {
-            userInput.style.height = (userInput.scrollHeight) + 'px';
-        });
-
     </script>
 </body>
 </html>

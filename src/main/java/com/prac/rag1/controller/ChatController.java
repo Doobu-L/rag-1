@@ -24,36 +24,46 @@ public class ChatController
 
 
         @GetMapping("/ask")
-        String generation(@RequestParam String userInput) {
+        String generation(@RequestParam String userInput,
+                                @RequestParam(defaultValue = "false") boolean useRag) { // RAG 사용 여부 파라미터
             SimpleLoggerAdvisor customLogger = new SimpleLoggerAdvisor(
                     request -> "Custom request: " + request.prompt().getUserMessage(),
                     response -> "Custom response: " + response.getResult(),
                     0
             );
 
-            List<Document> hits = vectorStore.similaritySearch(SearchRequest.builder().query(userInput).topK(5).build());
+            String systemPrompt;
 
-            StringBuilder ctx = new StringBuilder();
-            for (int i = 0; i < hits.size(); i++) {
-                Document d = hits.get(i);
-                ctx.append("【").append(i + 1).append("】 ").append(d.getFormattedContent().trim()).append("\n");
-                if (d.getMetadata() != null && !d.getMetadata().isEmpty()) {
-                    ctx.append("meta: ").append(d.getMetadata()).append("\n");
-                }
-                ctx.append("\n");
-            };
+            if (useRag) {
+                // RAG 모드일 때만 벡터 검색 및 컨텍스트 생성
+                List<Document> hits = vectorStore.similaritySearch(SearchRequest.builder().query(userInput).topK(5).build());
 
-            System.out.printf("ctx: %s\n", ctx.toString());
-            String system = """
-            당신은 한국어 어시스턴트입니다.
-            아래 <컨텍스트>만을 근거로 간결하고 정확히 답하세요. 모르면 모른다고 하세요.
-            <컨텍스트>
-            %s
-            </컨텍스트>
-            """.formatted(ctx.toString());
+                StringBuilder ctx = new StringBuilder();
+                for (int i = 0; i < hits.size(); i++) {
+                    Document d = hits.get(i);
+                    ctx.append("【").append(i + 1).append("】 ").append(d.getFormattedContent().trim()).append("\n");
+                    if (d.getMetadata() != null && !d.getMetadata().isEmpty()) {
+                        ctx.append("meta: ").append(d.getMetadata()).append("\n");
+                    }
+                    ctx.append("\n");
+                };
+
+                System.out.printf("ctx: %s\n", ctx.toString());
+                systemPrompt = """
+                당신은 한국어 어시스턴트입니다.
+                아래 <컨텍스트>만을 근거로 간결하고 정확히 답하세요. 모르면 모른다고 하세요.
+                <컨텍스트>
+                %s
+                </컨텍스트>
+                """.formatted(ctx.toString());
+            } else {
+                // 일반 LLM 모드일 때
+                systemPrompt = "당신은 유능한 한국어 어시스턴트입니다. 사용자에게 친절하고 상세하게 답변해주세요.";
+            }
+
 
             return this.chatClient.prompt()
-                    .system(system)
+                    .system(systemPrompt)
                     .advisors(customLogger)
                     //.advisors(new QuestionAnswerAdvisor())
                     .user(userInput)
