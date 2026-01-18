@@ -1,4 +1,4 @@
-package com.prac.rag1.config;
+package com.prac.rag1.infrastructure.config;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;

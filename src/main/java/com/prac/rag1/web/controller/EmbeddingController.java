@@ -1,6 +1,6 @@
-package com.prac.rag1.controller;
+package com.prac.rag1.web.controller;
 
-import com.prac.rag1.service.EmbeddingService;
+import com.prac.rag1.application.service.EmbeddingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.embedding.Embedding;
 import org.springframework.ai.embedding.EmbeddingResponse;

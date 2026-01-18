@@ -1,6 +1,6 @@
-package com.prac.rag1.controller;
+package com.prac.rag1.web.controller;
 
-import com.prac.rag1.service.IngestService;
+import com.prac.rag1.application.service.IngestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

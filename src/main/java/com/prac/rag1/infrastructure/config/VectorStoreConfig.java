@@ -1,4 +1,4 @@
-package com.prac.rag1.config;
+package com.prac.rag1.infrastructure.config;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpHost;

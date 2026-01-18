@@ -1,4 +1,4 @@
-package com.prac.rag1.service;
+package com.prac.rag1.application.service;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

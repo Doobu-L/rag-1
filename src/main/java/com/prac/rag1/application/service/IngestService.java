@@ -1,4 +1,4 @@
-package com.prac.rag1.service;
+package com.prac.rag1.application.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.document.Document;

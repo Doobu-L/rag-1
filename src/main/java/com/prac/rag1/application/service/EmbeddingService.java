@@ -1,4 +1,4 @@
-package com.prac.rag1.service;
+package com.prac.rag1.application.service;
 
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.beans.factory.annotation.Qualifier;

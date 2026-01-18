@@ -123,7 +123,13 @@
                 userInput.value = '';
 
                 try {
-                    const response = await fetch(`/chat/ask?userInput=${encodeURIComponent(message)}&useRag=${currentMode === 'rag'}`);
+                    const response = await fetch('/chat/ask', {
+                        method: 'POST',
+                        body: new URLSearchParams({
+                            'userInput': message,
+                            'useRag': currentMode === 'rag'
+                        })
+                    });
                     if (!response.ok) throw new Error(`HTTP ${response.status}`);
                     const aiResponse = await response.text();
                     addMessage(aiResponse, 'ai');
